@@ -82,7 +82,7 @@ http://m.app.caixin.com/m_topic_detail/1473.html'''
         message += f'\n发送 查询<地区> 来查询对应人数'
         await bot.send(context, message)
         return
-    if '查询' in context['message']:
+    if context['message'][:2] == '查询':
         r = get_session()
         data = get_zone(r)
         for i in data:
