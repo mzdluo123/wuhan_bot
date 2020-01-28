@@ -19,7 +19,7 @@ def get_count(r):
     dataA = r.html.find('#getStatisticsService', first=True).text
     dataA = dataA[36:-11]
     dataA = json.loads(dataA)
-    return dataA['countRemark']
+    return dataA
 
 
 def get_messages(r):
@@ -32,6 +32,13 @@ def get_messages(r):
 def get_zone(r):
     data = r.html.find("#getAreaStat", first=True).text
     data = data[27:-11]
+    data = json.loads(data)
+    return data
+
+
+def get_rumor(r):
+    data = r.html.find("#getIndexRumorList", first=True).text
+    data = data[33:-11]
     data = json.loads(data)
     return data
 
@@ -52,11 +59,11 @@ def get_session():
 async def handle_msg(context):
     if context['message_type'] != 'group':
         return
-    if context['group_id'] != 263856041:
-        return
     if context['message'] == 'test':
         r = get_session()
-        await bot.send(context, get_count(r))
+        data = get_count(r)
+        message = f'确诊:{data["confirmedCount"]} 疑似:{data["suspectedCount"]} 治愈:{data["curedCount"]} 死亡:{data["deadCount"]}'
+        await bot.send(context, message)
         dataB = get_messages(r)
         latest = dataB[0]
         message = f'''{latest['title']}
@@ -87,13 +94,21 @@ http://m.app.caixin.com/m_topic_detail/1473.html'''
         data = get_zone(r)
         for i in data:
             if i["provinceShortName"] == context['message'][2:]:
-                message = f'{i["provinceShortName"]} \n确诊:{i["confirmedCount"]} 疑似:{i["suspectedCount"]} 治愈:{i["curedCount"]} 死亡:{i["deadCount"]} \n以下是城市信息\n'
+                message = f'{i["provinceShortName"]} \n确诊:{i["confirmedCount"]} 治愈:{i["curedCount"]} 死亡:{i["deadCount"]} \n以下是城市信息\n'
                 for a in i['cities']:
-                    message += f'{a["cityName"]} 确诊:{a["confirmedCount"]} 疑似:{a["suspectedCount"]} 治愈:{a["curedCount"]} 死亡:{a["deadCount"]}\n'
+                    message += f'{a["cityName"]} 确诊:{a["confirmedCount"]} 治愈:{a["curedCount"]} 死亡:{a["deadCount"]}\n'
                 await bot.send(context, message)
                 return
         await bot.send(context, f'暂无数据')
         return
+    if context['message'] == '辟谣':
+        r = get_session()
+        data = get_rumor(r)
+        message = ''
+        for i in data:
+            message += f'{i["title"]}\n{i["mainSummary"]}\n{i["body"]}\n'
+        message += "更多信息请到丁香园网站查询"
+        await bot.send(context,message)
 
 
 bot.run(host='127.0.0.1', port=6700)
