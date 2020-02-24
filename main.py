@@ -43,6 +43,13 @@ def get_rumor(r):
     return data
 
 
+def get_country(r):
+    data = r.html.find("#getListByCountryTypeService2", first=True).text
+    data = data[44:-11]
+    data = json.loads(data)
+    return data
+
+
 def get_session():
     # update cache
     if time.time() - _cache["cache_time"] >= cache_life:
@@ -57,8 +64,6 @@ def get_session():
 
 @bot.on_message()
 async def handle_msg(context):
-    if context['message_type'] != 'group':
-        return
     if context['message'] == 'test':
         r = get_session()
         data = get_count(r)
@@ -84,9 +89,13 @@ http://m.app.caixin.com/m_topic_detail/1473.html'''
         r = get_session()
         message = ""
         data = get_zone(r)
+        country = get_country(r)
         for i in data:
             message += f'{i["provinceShortName"]} '
-        message += f'\n发送 查询<地区> 来查询对应人数'
+        message += f'\n发送 查询<地区> 来查询对应人数\n'
+        for i in country:
+            message += f'{i["provinceName"]} '
+        message += f'\n发送 世界查询<地区> 来查询对应人数'
         await bot.send(context, message)
         return
     if context['message'][:2] == '查询':
@@ -101,14 +110,24 @@ http://m.app.caixin.com/m_topic_detail/1473.html'''
                 return
         await bot.send(context, f'暂无数据')
         return
+    if context['message'][:4] == '世界查询':
+        r = get_session()
+        data = get_country(r)
+        for i in data:
+            if i["provinceName"] == context['message'][4:]:
+                message = f'{i["provinceName"]} \n确诊:{i["confirmedCount"]} 治愈:{i["curedCount"]} 死亡:{i["deadCount"]}'
+                await bot.send(context, message)
+                return
+        await bot.send(context, f'暂无数据')
+        return
     if context['message'] == '辟谣':
         r = get_session()
         data = get_rumor(r)
         message = ''
         for i in data:
-            message += f'{i["title"]}\n{i["mainSummary"]}\n{i["body"]}\n'
+            message += f'★{i["title"]}\n※{i["mainSummary"]}\n✧{i["body"]}\n'
         message += "更多信息请到丁香园网站查询"
-        await bot.send(context,message)
+        await bot.send(context, message)
 
 
 bot.run(host='127.0.0.1', port=6700)
