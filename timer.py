@@ -16,8 +16,8 @@ def set_date(date):
 
 
 def get_messages(r):
-    dataB = r.html.find('#getTimelineService', first=True).text
-    dataB = dataB[34:-11]
+    dataB = r.html.find('#getTimelineServiceundefined', first=True).text
+    dataB = dataB[43:-11]
     dataB = json.loads(dataB)
     return dataB
 
@@ -46,6 +46,6 @@ if __name__ == '__main__':
     while True:
         try:
             run()
-        except Exception:
-            pass
+        except Exception as e:
+            print(e)
         time.sleep(60)

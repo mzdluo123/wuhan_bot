@@ -23,8 +23,8 @@ def get_count(r):
 
 
 def get_messages(r):
-    dataB = r.html.find('#getTimelineService', first=True).text
-    dataB = dataB[34:-11]
+    dataB = r.html.find('#getTimelineServiceundefined', first=True).text
+    dataB = dataB[43:-11]
     dataB = json.loads(dataB)
     return dataB
 
@@ -44,8 +44,8 @@ def get_rumor(r):
 
 
 def get_country(r):
-    data = r.html.find("#getListByCountryTypeService2", first=True).text
-    data = data[44:-11]
+    data = r.html.find("#getListByCountryTypeService2true", first=True).text
+    data = data[48:-11]
     data = json.loads(data)
     return data
 
