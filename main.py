@@ -23,8 +23,8 @@ def get_count(r):
 
 
 def get_messages(r):
-    dataB = r.html.find('#getTimelineServiceundefined', first=True).text
-    dataB = dataB[43:-11]
+    dataB = r.html.find('#getTimelineService1', first=True).text
+    dataB = dataB[35:-11]
     dataB = json.loads(dataB)
     return dataB
 

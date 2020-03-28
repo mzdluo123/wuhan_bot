@@ -2,6 +2,7 @@ import requests
 from requests_html import HTMLSession
 import json
 import time
+
 session = HTMLSession()
 
 
@@ -16,10 +17,23 @@ def set_date(date):
 
 
 def get_messages(r):
-    dataB = r.html.find('#getTimelineServiceundefined', first=True).text
-    dataB = dataB[43:-11]
+    dataB = r.html.find('#getTimelineService1', first=True).text
+    dataB = dataB[35:-11]
     dataB = json.loads(dataB)
     return dataB
+
+
+def get_broadcast_groups():
+    with open("groups.txt", "r") as file:
+        return [i for i in file.read().split("\n")]
+
+
+def broadcast(msg):
+    for i in get_broadcast_groups():
+        rep = requests.get('http://127.0.0.1:5700/send_group_msg',
+                           params={'access_token': 'your-gdfhuighuidfg', 'group_id': i, 'message': msg})
+        print(f"{i} {rep.status_code}")
+        time.sleep(1)
 
 
 def run():
@@ -35,11 +49,8 @@ def run():
         message = f'''{latest['title']}
 {latest['summary']}
 {latest['sourceUrl']}'''
-        r = requests.get('http://127.0.0.1:5700/send_group_msg',
-                         params={'access_token': 'your-gdfhuighuidfg', 'group_id': 263856041, 'message': message},
-                         )
-        print(r.status_code)
-    print("success")
+        broadcast(message)
+    print("无需发送消息")
 
 
 if __name__ == '__main__':
